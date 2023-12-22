@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Audio } from 'expo-av'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from './src/components/Header';
 import Timer from './src/components/Timer';
 
@@ -12,9 +12,24 @@ export default function App() {
   const [time, setTime] = useState(25 * 60)
   const [currentTime, setCurrentTime] = useState('POMO' | 'SHORT' | 'BREAK')
   const [isActive, setIsActive] = useState(false)
-  const handleWorking = () => {
-    setIsWorking(!isWorking)
-  }
+  
+  useEffect(() => {
+    let interval = null
+    if (isActive) {
+      interval = setInterval(() => {
+        setTime(time - 1)
+      }, 1000)
+    } else {
+      clearInterval(interval)
+    }
+    if (time === 0) {
+      setIsActive(false)
+      setIsWorking(prev => !prev)
+      setTime(isWorking ? 300 : 1500 )
+      
+    }
+    return () => clearInterval(interval)
+  }, [isActive, time])
   const handleStart = () => {
     playSound()
     setIsActive(!isActive)
